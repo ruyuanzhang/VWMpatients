@@ -3,9 +3,8 @@
 % 
 %
 % History
+%   20190826 RZ change the monitor setting part
 %   20190808 RZ save revise the code and save more inforamtion.
-%   20190709 RZ adds brainSite
-%   20190629 RZ modified original code
 
 
 clear all;close all;
@@ -16,26 +15,13 @@ addpath(genpath('')); % add the RZutil directory here and the end of this script
 
 
 subj = input('Please thwe subject initial (e.g., RYZ or RZ)?: ','s');
-
-brainSite = 'prac';
 nStim = 2;
-day = 1;
-
-monitor = 2; % which monitor to use, 1, 210east; 2, 210middle (default)
 nTrials = 50; % how many trials
 
 %% calculation monitor parameters
-if monitor == 1 % 210east
-    scrSize = [47.5 30.5]; % [width, height] cm
-    resolution = [1024 768]; % pixels
-    viewDist = 52; %cm
-elseif monitor == 2 %210middle
-    scrSize = [40.5 30.5]; % [width, height] cm
-    resolution = [1920 1440];
-    viewDist = 52; % cm   
-else
-    error('wrong monitor!')
-end
+scrSize = [32 18]; % [width, height] cm
+resolution = [1920 1080]; % pixels
+viewDist = 50; %cm
 scale_factor = atand(scrSize(1)/2/viewDist)*2*60/resolution(1); % how many acrmin per pixels
 
 %% stimuli parameters
@@ -209,7 +195,7 @@ for trial = 1:nTrials
     
 end
 % Save the data
-filename = strcat(subj,sprintf('_day%d_set%d_%s_',day,nStim, brainSite),datestr(now,'yymmddHHMM'),'.mat');
+filename = strcat(subj,sprintf('_set%d_prac_',nStim),datestr(now,'yymmddHHMM'),'.mat');
 if exist(filename,'file')
     error('data file name exists')
 end

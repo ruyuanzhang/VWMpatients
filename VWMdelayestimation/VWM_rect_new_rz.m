@@ -14,26 +14,14 @@ clear all;close all;
 
 addpath(genpath('')); % add the RZutil directory here and the end of this script
 
-day = input('Please the day number (1-4)?: ');
 subj = input('Please the subject initial (e.g., RYZ or RZ)?: ','s');
-brainSite = input('Please the simulation site (sham/IPS/V1/DLPFC)?: ','s');
-nStim = input('Please input number of stimuli (set size = 2,4,6)?: ');
-
-monitor = 2; % which monitor to use, 1, 210east; 2, 210middle (default)
-nTrials = 120; % how many trials
+nStim = input('Please input number of stimuli (set size = 1,3,6)?: ');
+nTrials = 80; % how many trials
 
 %% calculation monitor parameters
-if monitor == 1 % 210east
-    scrSize = [47.5 30.5]; % [width, height] cm
-    resolution = [1024 768]; % pixels
-    viewDist = 52; %cm
-elseif monitor == 2 %210middle
-    scrSize = [40.5 30.5]; % [width, height] cm
-    resolution = [1920 1440];
-    viewDist = 52; % cm   
-else
-    error('wrong monitor!')
-end
+scrSize = [32 18]; % [width, height] cm
+resolution = [1920 1080]; % pixels
+viewDist = 50; %cm
 scale_factor = atand(scrSize(1)/2/viewDist)*2*60/resolution(1); % how many acrmin per pixels
 
 %% stimuli parameters
@@ -207,7 +195,7 @@ for trial = 1:nTrials
     
 end
 % Save the data
-filename = strcat(subj,sprintf('_day%d_set%d_%s_',day,nStim, brainSite),datestr(now,'yymmddHHMM'),'.mat');
+filename = strcat(subj,sprintf('_set%d_',nStim),datestr(now,'yymmddHHMM'),'.mat');
 if exist(filename,'file')
     error('data file name exists')
 end
