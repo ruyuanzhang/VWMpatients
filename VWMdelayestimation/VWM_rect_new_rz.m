@@ -36,7 +36,7 @@ shapeSize = 1.5; % deg, diameter (circle) or edge length of an object
 %% Experimental parameters
 delayDur = 1; % seconds;
 sampleDur = 0.11; % sample duration
-respLimit = 60; % Time window for a response
+respLimit = 4; % Time window for a response
 
 %% calculate some parameters
 radin = radin * 60 / scale_factor;
@@ -186,7 +186,7 @@ while trial <= nTrials
     end
     
     if noresp == 1 % no response within 4 seconds
-        nTrials = nTrials + 1;
+        nTrials = nTrials + 1; % we add a trial is no response within 4s
     end
     
     results.RT(trial) = GetSecs - time1;
