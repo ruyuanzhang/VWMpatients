@@ -1,7 +1,5 @@
 % VWM color-delayed estimation task
 %
-% 
-%
 % History
 %   20191025 RZ add 4s constraint (subject must response within 4s) for the respnse
 %   20190808 RZ save revise the code and save more inforamtion.
@@ -12,7 +10,7 @@ clear all;close all;
 
 %% Parameter you want to change
 
-%addpath(genpath('')); % add the RZutil directory here and the end of this script
+addpath(genpath('./utils')); % add the RZutil directory here and the end of this script
 
 subj = input('Please the subject initial (e.g., RYZ or RZ)?: ','s');
 nStim = input('Please input number of stimuli (set size = 1,3,6)?: ');
@@ -22,8 +20,9 @@ nTrials = 80; % How many trials for each set size.
 scrSize = [32 18]; % [width, height] cm
 resolution = [1920 1080]; % pixels
 viewDist = 50; %cm
-scale_factor = atand(scrSize(1)/2/viewDist)*2*60/resolution(1); % how many acrmin per pixels
 
+
+scale_factor = atand(scrSize(1)/2/viewDist)*2*60/resolution(1); % how many acrmin per pixels
 %% stimuli parameters
 ovalr = 5; % pixels, radius of fixation oval
 radin = 7.8; % deg,
@@ -55,7 +54,7 @@ scr.width = wRect(3);
 scr.height = wRect(4);
 
 %% instruction
-a = imread('instruction.jpg');
+a = imread('./utils/instruction.jpg');
 GratingIndex = Screen('MakeTexture',w,a);  
 GRect = Screen('Rect',GratingIndex);   
 cGRect = CenterRect(GRect,wRect);    
@@ -151,9 +150,9 @@ while trial <= nTrials
     Screen('FrameOval', w, 0,[scr.width/2-ovalr, scr.height/2-ovalr, scr.width/2+ovalr, scr.height/2+ovalr],2,2)
     
     % draw stimuli (debug purpose)
-    for ind = 1:length(posi)
-        Screen('FillRect', w, color_list(posi(ind),:), positionscale(posi(ind),:)); % change these part, otherwise the nearby color tend to be the same color
-    end
+%     for ind = 1:length(posi)
+%         Screen('FillRect', w, color_list(posi(ind),:), positionscale(posi(ind),:)); % change these part, otherwise the nearby color tend to be the same color
+%     end
     
     % Draw black frames
     results.probePosiInd(trial)=draw_frames(w, positionscale, color_list); % 1-8; output bold is the row index in color_list, which is the bolded color.
@@ -162,10 +161,10 @@ while trial <= nTrials
     
     
     % for debug purpose
-    fprintf('nTrials is %d \n', nTrials);
-    fprintf('wheel start is %d \n', results.colorWheelStart(trial));
-    fprintf('probe location is %d \n', results.probePosiInd(trial));
-    fprintf('probe color is %d \n', results.probeInd(trial));
+%     fprintf('nTrials is %d \n', nTrials);
+%     fprintf('wheel start is %d \n', results.colorWheelStart(trial));
+%     fprintf('probe location is %d \n', results.probePosiInd(trial));
+%     fprintf('probe color is %d \n', results.probeInd(trial));
        
     %% response
     time1 = GetSecs;   %
@@ -187,25 +186,25 @@ while trial <= nTrials
     
     if noresp == 1 % no response within 4 seconds
         nTrials = nTrials + 1; % we add a trial is no response within 4s
+        Arc = nan;
+        results.respIndArc(trial)=nan;
+        results.respInd(trial) = nan; % respInd, 1~180
+        results.error(trial) = nan; % error range, -90~89
+    else
+        results.RT(trial) = GetSecs - time1;
+        % Convert to degree between [1:360]
+        dis_y = scr.height/2-Y;
+        if X-scr.width/2 >= 0
+            Arc = acosd(dis_y/d);
+        else
+            Arc = 180+acosd(-dis_y/d);
+        end
+        results.respIndArc(trial)=Arc; % Arc, 1~360, nan if no response
+        results.respInd(trial) = colorwheel(floor(Arc/2)+1); % respInd, 1~180
+        results.error(trial) = circulardiff(results.respInd(trial),results.probeInd(trial), 180); % error range, -90~89
     end
-    
-    results.RT(trial) = GetSecs - time1;
     
     %% Calculate response 
-    
-    % Convert to degree between [1:360]
-    dis_y = scr.height/2-Y;
-    if X-scr.width/2 >= 0
-        Arc = acosd(dis_y/d);
-    else
-        Arc = 180+acosd(-dis_y/d);
-    end
-    
-    % Convert 2 colorindex
-    results.respIndArc(trial)=Arc; % Arc, 1~360
-    results.respInd(trial) = colorwheel(floor(Arc/2)+1); % respInd, 1~180
-    results.error(trial) = circulardiff(results.respInd(trial),results.probeInd(trial), 180); % error range, -90~89
-
     Screen('FillRect',w,[bg bg bg]);
     Screen('FrameOval', w, 0,[scr.width/2-ovalr, scr.height/2-ovalr, scr.width/2+ovalr, scr.height/2+ovalr],2,2)
     Screen('Flip',w);
@@ -213,8 +212,7 @@ while trial <= nTrials
     WaitSecs(b);
     
     % debug purpose
-    fprintf('resp color is %d \n\n', results.respInd(trial));
-    
+    % fprintf('resp color is %d \n\n', results.respInd(trial));
     
     if trial == nTrials/2
         Screen('DrawTexture',w,GratingIndex,GRect,cGRect);  
@@ -242,7 +240,7 @@ ylabel('Number of trials');
 saveas(gcf, filename(1:end-4), 'png'); % save the figure
 
 %%
-rmpath(genpath('')); % remove the RZutil directory here
+rmpath(genpath('./utils')); % remove the RZutil directory here
 
 
 
