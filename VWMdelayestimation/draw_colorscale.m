@@ -12,7 +12,8 @@ elseif start==180
     color_index=[180 1:179];
 end
 
-%color_index = 1:180; % debug purpose
+% debug purpose
+% color_index = 1:180; 
 
 for i=1:180
     Screen('FillArc',wnd,colorscale(color_index(i),:),[cpoint-radout cpoint+radout],i*2-2,2);
