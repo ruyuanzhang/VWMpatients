@@ -1,6 +1,8 @@
 % VWM color-delayed estimation task
 %
 % History
+%   20191206 RZ confirmed not only record probe and response, also record
+%       all color squares information
 %   20191025 RZ add 4s constraint (subject must response within 4s) for the respnse
 %   20190808 RZ save revise the code and save more inforamtion.
 %   20190709 RZ adds brainSite
@@ -20,7 +22,6 @@ nTrials = 80; % How many trials for each set size.
 scrSize = [32 18]; % [width, height] cm
 resolution = [1920 1080]; % pixels
 viewDist = 50; %cm
-
 
 scale_factor = atand(scrSize(1)/2/viewDist)*2*60/resolution(1); % how many acrmin per pixels
 %% stimuli parameters
@@ -69,12 +70,12 @@ colorscale = load('colorscale','colorscale');
 colorscale = colorscale.colorscale;
 %% Start
 results.colorWheelStart = zeros(1, nTrials); % the start number of the colorwheel?1~180
+results.probeInd = zeros(1,nTrials); % probe color index, 1~180
 results.respInd = zeros(1, nTrials); % response color index, 1~180
 results.respIndArc = zeros(1, nTrials); % response degree on the colorwheel, 1~360
 results.stimuliInd = zeros(nTrials, nStim); % all stimuli color index
 results.RT = zeros(1, nTrials); % reaction time
 results.probePosiInd = zeros(1,nTrials); % probe position index, 1-8
-results.probeInd = zeros(1,nTrials); % probe color index, 1~180
 results.colorList = cell(1,nTrials); % colorlist for all stimull
 results.posiInd = zeros(nTrials,nStim); % position index of all targets, 1-8
 
@@ -156,7 +157,7 @@ while trial <= nTrials
     
     % Draw black frames
     results.probePosiInd(trial)=draw_frames(w, positionscale, color_list); % 1-8; output bold is the row index in color_list, which is the bolded color.
-    results.probeInd(trial) = x(find(posi == results.probePosiInd(trial))); % 1-180, color index of the probe
+    results.probeInd(trial) = x(posi == results.probePosiInd(trial)); % 1-180, color index of the probe
     Screen('Flip',w);
     
     
