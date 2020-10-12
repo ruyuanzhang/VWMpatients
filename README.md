@@ -5,6 +5,7 @@ This is the matlab code repository for delayed-estimation visual working memory 
 This code is mainly for patient studies. In a single session, we tested many set size levels and several trials.  
 
 ## History
+
 * 2020/10/12, RZ add multiple set size levels 
 * 2019/12/05, RZ saved all non-target color in a trial  
 * 2019/10/25 RZ add 4 seconds response constraint, otherwise the trial will be added at the end.
@@ -14,15 +15,17 @@ This code is mainly for patient studies. In a single session, we tested many set
 
 ## Instructions of running experiments
 ### Preparation
+* Please download Ru-Yuan Zhang's utility function repository https://github.com/ruyuanzhang/RZutil, and add it to your matlab path
 * You should know your monitor physical size [height cm, width cm] and resolution [height px, widwth px].
 * Please keep the view distance roughly 50cm.
 
 ### Running experiment
-1. For each run, simply type below to run the experiment. It needs to input the number of stimuli (e.g., 1,3,6)
+
+1. For each run, simply type the subject's initial to run the experiment. 
 
 ~~~matlab
 >> VWM_rect_new_rz.m
-Please input the number of stimuli: 3
+Please the subject initial (e.g., RYZ or RZ)?: RZ
 ~~~
 
 
