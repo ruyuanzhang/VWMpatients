@@ -2,7 +2,10 @@
 
 This is the matlab code repository for delayed-estimation visual working memory (TMVWM) project. The main contributor for this project is [Ru-Yuan Zhang](ruyuanzhang@gmail.com).
 
+This code is mainly for patient studies. In a single session, we tested many set size levels and several trials.  
+
 ## History
+* 2020/10/12, RZ add multiple set size levels 
 * 2019/12/05, RZ saved all non-target color in a trial  
 * 2019/10/25 RZ add 4 seconds response constraint, otherwise the trial will be added at the end.
 * 2019/09/11 RZ fixed the bugs 
