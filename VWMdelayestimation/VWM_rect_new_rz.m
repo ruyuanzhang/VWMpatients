@@ -1,6 +1,7 @@
 % VWM color-delayed estimation task
 %
 % History
+%   20201016 RZ fixed the screen resolution on mac
 %   20201012 RZ add multiple levels of set size within the same session
 %   20191206 RZ confirmed not only record probe and response, also record
 %       all color squares information
@@ -15,11 +16,13 @@ clear all;close all;clc;
 subj = input('Please the subject initial (e.g., RYZ or RZ)?: ','s');
 
 scrSize = [32 18]; % [width, height] cm
-resolution = [2560 1600]; % pixels, be careful about the
-viewDist = 50; %please keep the viewDist roughly 50 cm
+resolution = [2560 1600]; % pixels, be careful about the, MacOS is
+%resolution = [3840 2160]; % pixels, be careful about the, MacOS is
 
 nStim = [1 3 6 8]; % set size levels
 trialsPerStim = [50 50 30 30]; % How many trials for each set size.
+
+viewDist = 50; %please keep the viewDist roughly 50 cm
 %% calculation monitor parameters
 addpath(genpath('./utils')); % add the RZutil directory here and the end of this script
 nTrials = sum(trialsPerStim);
@@ -50,18 +53,20 @@ colorinfo=zeros(100, 8, 3);  %
 %% Open window
 Screen('Preference', 'SkipSyncTests', 1);
 Screens = Screen('Screens');
-ScreenNum = min(Screens); 
+PsychImaging('PrepareConfiguration');
+PsychImaging('AddTask','General','UseRetinaResolution');
+ScreenNum = max(Screens); 
 %[w, wRect] = Screen('OpenWindow', ScreenNum, [255 255 255],[0 0 resolution(1) resolution(2)]); 
-[w, wRect] = Screen('OpenWindow', 1, [255 255 255]); 
+[w, wRect] = PsychImaging('OpenWindow', ScreenNum);
 scr.width = wRect(3);
 scr.height = wRect(4);
 
 %% instruction
 a = imread('./utils/instruction.jpg');
-GratingIndex = Screen('MakeTexture',w,a);  
+GratingIndex = Screen('MakeTexture',w, a);  
 GRect = Screen('Rect', GratingIndex);   
-cGRect = CenterRect(GRect,wRect);    
-Screen('DrawTexture',w, GratingIndex,GRect,cGRect);  
+cGRect = CenterRect([0 0 1600/GRect(4)*GRect(3) 1600],wRect);    
+Screen('DrawTexture',w, GratingIndex, GRect, cGRect);  
 Screen('Flip',w);  %
 getkeyresp('space'); % Wait for space to start the experiment
 
@@ -95,7 +100,7 @@ while trial <= nTrials
 
     %% Fixation
     Screen('FillRect', w, [bg bg bg]); 
-    Screen('FrameOval', w, 0,[scr.width/2-ovalr, scr.height/2-ovalr, scr.width/2+ovalr, scr.height/2+ovalr],2,2)
+    Screen('FrameOval', w, 0, [scr.width/2-ovalr, scr.height/2-ovalr, scr.width/2+ovalr, scr.height/2+ovalr],2,2);
     Screen('Flip',w);
     a = randsample(300:50:500,1)/1000; % randomly sample a fixation period
     WaitSecs(a);
@@ -104,14 +109,9 @@ while trial <= nTrials
     Screen('FillRect',w, [bg bg bg]); 
     Screen('TextSize',w, 35);        
     Screen('FrameOval', w, 0,[scr.width/2-ovalr, scr.height/2-ovalr, scr.width/2+ovalr, scr.height/2+ovalr],2,2)
-    
-    Screen('FillRect',w, [0 0 0], [0 0 100 100]);
     Screen('Flip', w);
     
     % We randomly start the color wheel to sample the colors of targets
-    Screen('FillRect',w, [0 0 0], [0 0 200 200]);
-    Screen('Flip', w);
-    
     rng(GetSecs);
     start = floor(rand()*180)+1; %1-180
     if start > 1 && start < 180
@@ -144,10 +144,10 @@ while trial <= nTrials
     results.colorList{trial} = color_list;
    
     % draw stimuli
+    Screen('FrameOval', w, 0,[scr.width/2-ovalr, scr.height/2-ovalr, scr.width/2+ovalr, scr.height/2+ovalr],2,2)
     for ind = 1:length(posi)
         Screen('FillRect', w, color_list(posi(ind),:), positionscale(posi(ind),:)); % change these part, otherwise the nearby color tend to be the same color
     end
-    
     Screen('Flip',w);
     WaitSecs(sampleDur);       
     
@@ -163,7 +163,7 @@ while trial <= nTrials
     results.colorWheelStart(trial) = colorwheel(1); % % save the start point of colorwheel information
     
     % Fixation point
-    Screen('FrameOval', w, 0,[scr.width/2-ovalr, scr.height/2-ovalr, scr.width/2+ovalr, scr.height/2+ovalr],2,2)
+    Screen('FrameOval', w, 0,[scr.width/2-ovalr, scr.height/2-ovalr, scr.width/2+ovalr, scr.height/2+ovalr],2,2);
     
     % draw stimuli (debug purpose)
 %     for ind = 1:length(posi)
@@ -223,10 +223,10 @@ while trial <= nTrials
         results.error(trial) = circulardiff(results.respInd(trial),results.probeInd(trial), 180); % error range, -90~89
     end
     
-    % for debug purpose 
-    results.respIndArc(trial)
-    results.respInd(trial)
-    results.error(trial)
+%     % for debug purpose 
+%     results.respIndArc(trial)
+%     results.respInd(trial)
+%     results.error(trial)
     
     
     %% Calculate response 
@@ -259,7 +259,7 @@ save(filename);
 Screen('CloseAll');
 
 %% calculate the response and save it
-histogram(results.error,12);
+histogram(results.error, 12);
 xlim([-90 90]);
 xlabel('Resp error (color deg)');
 ylabel('Number of trials');
