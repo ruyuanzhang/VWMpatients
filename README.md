@@ -7,6 +7,7 @@ This code is mainly for patient studies. In a single session, we tested many set
 ## History
 
 * 2020/10/21, 
+  * RZ combine the main experiment and practice
   * RZ add to 2 rest during the exp
   * RZ add 'esc' as the key to quit
   * RZ update data analysis script
@@ -31,6 +32,7 @@ This code is mainly for patient studies. In a single session, we tested many set
 ~~~matlab
 >> VWM_rect_new_rz.m
 Please the subject initial (e.g., RYZ or RZ)?: RZ
+Please choose the exp (1, main exp; 0, practice): 1
 ~~~
 
 

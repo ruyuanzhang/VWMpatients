@@ -30,6 +30,7 @@ nStim = [1 3 6 8]; % set size levels
 trialsPerStim = [3 3 3 3]; % How many trials for each set size.
 
 viewDist = 50; %please keep the viewDist roughly 50 cm
+
 %% calculation monitor parameters
 addpath(genpath('./utils')); % add the RZutil directory here and the end of this script
 nTrials = sum(trialsPerStim);
