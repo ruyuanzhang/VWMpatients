@@ -1,8 +1,8 @@
-% VWM color-delayed estimation task
+% VWM color-delayed estimation task, this is the practice
 %
 % History
-%   20201020 RZ switched 2 rests, add "esc" as the key for quit.
-%   20201016 RZ fixed the screen resolution on mac
+%   20201016 RZ fixed the screen resolution on mac, combine practice and
+%       main experiment
 %   20201012 RZ add multiple levels of set size within the same session
 %   20191206 RZ confirmed not only record probe and response, also record
 %       all color squares information
@@ -13,22 +13,23 @@
 
 clear all;close all;clc;
 KbName('UnifyKeyNames');
+
 %%  ------- !!! important !!! Parameter you want to change ----------
 subj = input('Please the subject initial (e.g., RYZ or RZ)?: ','s');
+mainExp = input('Please choose the exp (1, main exp; 0, practice): ');
 
 % mac built-in screen
-%scrSize = [32 18]; % [width, height] cm
-%resolution = [2560 1600]; % pixels, be careful about the, MacOS is
+scrSize = [32 18]; % [width, height] cm
+resolution = [2560 1600]; % pixels, be careful about the, MacOS is
 
 % % office desk monitor
-scrSize = [59.5 33.5]; % [width, height] cm
-resolution = [3840 2160]; % pixels, be careful about the, MacOS is
+%scrSize = [59.5 33.5]; % [width, height] cm
+%resolution = [3840 2160]; % pixels, 
 
 nStim = [1 3 6 8]; % set size levels
-trialsPerStim = [50 50 30 30]; % How many trials for each set size.
+trialsPerStim = [3 3 3 3]; % How many trials for each set size.
 
 viewDist = 50; %please keep the viewDist roughly 50 cm
-
 %% calculation monitor parameters
 addpath(genpath('./utils')); % add the RZutil directory here and the end of this script
 nTrials = sum(trialsPerStim);
@@ -267,42 +268,42 @@ while trial <= nTrials
     % debug purpose
     % fprintf('resp color is %d \n\n', results.respInd(trial));
     
-    if rem(trial,60) == 0 % have rest every 60 trials
-        Screen('FillRect',w,[255 255 255]);
-        Screen('DrawTexture',w,GratingIndex,GRect,cGRect);  
-        Screen('DrawText',w,'Rest, press space to continue..',scr.width/2-300,scr.height/2,0); 
-        Screen('Flip',w);  %
-        getkeyresp('space'); % wait for space to start the experiment
-        
-    end
+%     if rem(trial,60) == 0 % have rest every 60 trials
+%         Screen('FillRect',w,[255 255 255]);
+%         Screen('DrawTexture',w,GratingIndex,GRect,cGRect);  
+%         Screen('DrawText',w,'Rest, press space to continue..',scr.width/2-300,scr.height/2,0); 
+%         Screen('Flip',w);  %
+%         getkeyresp('space'); % wait for space to start the experiment
+%         
+%     end
     
     trial = trial + 1;
 end
-% Save the data
-filename = strcat(subj,sprintf('_set%d_',nStim),datestr(now,'yymmddHHMM'),'.mat');
-if exist(filename,'file')
-    error('data file name exists')
-end
-save(filename);
-Screen('CloseAll');
-
-%% calculate some diagnostic features, and save it
-close all;
-cpsfigure(1,length(nStim));
-x = {};
-for i=1:length(nStim)
-    x = [x results.error(results.stimNum==nStim(i))];
-    ax = subplot(1,length(nStim), i);
-    histogram(x{i});
-    set(ax, 'Box', 'off');
-    xlim([-90 90]);
-    title(sprintf('Set size = %d', nStim(i)));
-    xlabel('Response error');
-    ylabel('# of Trials')
-end
-saveas(gcf, filename(1:end-4), 'png'); % save the figure
-
-%%
+% % Save the data
+% filename = strcat(subj,sprintf('_set%d_',nStim),datestr(now,'yymmddHHMM'),'.mat');
+% if exist(filename,'file')
+%     error('data file name exists')
+% end
+% save(filename);
+% Screen('CloseAll');
+% 
+% %% calculate some diagnostic features, and save it
+% close all;
+% cpsfigure(1,length(nStim));
+% x = {};
+% for i=1:length(nStim)
+%     x = [x results.error(results.stimNum==nStim(i))];
+%     ax = subplot(1,length(nStim), i);
+%     histogram(x{i});
+%     set(ax, 'Box', 'off');
+%     xlim([-90 90]);
+%     title(sprintf('Set size = %d', nStim(i)));
+%     xlabel('Response error');
+%     ylabel('# of Trials')
+% end
+% saveas(gcf, filename(1:end-4), 'png'); % save the figure
+% 
+% %%
 rmpath(genpath('./utils')); % remove the RZutil directory here
 
 
