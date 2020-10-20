@@ -1,6 +1,7 @@
 % VWM color-delayed estimation task
 %
 % History
+%   20201020 RZ switched 2 rests, add "esc" as the key for quit.
 %   20201016 RZ fixed the screen resolution on mac
 %   20201012 RZ add multiple levels of set size within the same session
 %   20191206 RZ confirmed not only record probe and response, also record
@@ -11,23 +12,29 @@
 %   20190629 RZ modified original code
 
 clear all;close all;clc;
-
+KbName('UnifyKeyNames');
 %%  ------- !!! important !!! Parameter you want to change ----------
 subj = input('Please the subject initial (e.g., RYZ or RZ)?: ','s');
 
-scrSize = [32 18]; % [width, height] cm
-resolution = [2560 1600]; % pixels, be careful about the, MacOS is
-%resolution = [3840 2160]; % pixels, be careful about the, MacOS is
+% mac built-in screen
+%scrSize = [32 18]; % [width, height] cm
+%resolution = [2560 1600]; % pixels, be careful about the, MacOS is
+
+% % office desk monitor
+scrSize = [59.5 33.5]; % [width, height] cm
+resolution = [3840 2160]; % pixels, be careful about the, MacOS is
 
 nStim = [1 3 6 8]; % set size levels
 trialsPerStim = [50 50 30 30]; % How many trials for each set size.
 
 viewDist = 50; %please keep the viewDist roughly 50 cm
+
 %% calculation monitor parameters
 addpath(genpath('./utils')); % add the RZutil directory here and the end of this script
 nTrials = sum(trialsPerStim);
 nSetSize = sum(nStim);
 scale_factor = atand(scrSize(1)/2/viewDist)*2*60/resolution(1); % how many acrmin per pixels
+
 %% stimuli parameters
 ovalr = round(0.25 * 60 / scale_factor); % pixels, radius of fixation oval
 radin = 7.8; % deg,
@@ -65,7 +72,7 @@ scr.height = wRect(4);
 a = imread('./utils/instruction.jpg');
 GratingIndex = Screen('MakeTexture',w, a);  
 GRect = Screen('Rect', GratingIndex);   
-cGRect = CenterRect([0 0 1600/GRect(4)*GRect(3) 1600],wRect);    
+cGRect = CenterRect([0 0 resolution(2)/GRect(4)*GRect(3) resolution(2)],wRect);    
 Screen('DrawTexture',w, GratingIndex, GRect, cGRect);  
 Screen('Flip',w);  %
 getkeyresp('space'); % Wait for space to start the experiment
@@ -83,17 +90,19 @@ for i=1:numel(nStim)
     results.stimNum = [results.stimNum nStim(i)*ones(1,trialsPerStim(i))];
 end
 results.stimNum = Shuffle(results.stimNum);
-results.colorWheelStart = zeros(1, nTrials); % the start number of the colorwheel?1~180
-results.probeInd = zeros(1,nTrials); % probe color index, 1~180
-results.respInd = zeros(1, nTrials); % response color index, 1~180
-results.respIndArc = zeros(1, nTrials); % response degree on the colorwheel, 1~360
-results.stimuliInd = zeros(nTrials, 8); % all stimulus color index
-results.RT = zeros(1, nTrials); % reaction time
-results.probePosiInd = zeros(1, nTrials); % probe position index, 1-8
+results.colorWheelStart = nan(1, nTrials); % the start number of the colorwheel?1~180
+results.probeInd = nan(1,nTrials); % probe color index, 1~180
+results.respInd = nan(1, nTrials); % response color index, 1~180
+results.respIndArc = nan(1, nTrials); % response degree on the colorwheel, 1~360
+results.stimuliInd = nan(nTrials, 8); % all stimulus color index
+results.RT = nan(1, nTrials); % reaction time
+results.probePosiInd = nan(1, nTrials); % probe position index, 1-8
 results.colorList = cell(1,nTrials); % colorlist for all stimull
-results.posiInd = zeros(nTrials, 8); % position index of all targets, 1-8
+results.posiInd = nan(nTrials, 8); % position index of all targets, 1-8
+
 %%
 trial = 1;
+exitflag = 0;
 while trial <= nTrials  
     
     HideCursor;
@@ -189,22 +198,41 @@ while trial <= nTrials
     noresp = 1; % first assume no response in this trial
     
     time1 = GetSecs;   %
+    rs_keys = '';
     while GetSecs-time1 < respLimit       
-        [x,y,buttons] = GetMouse(w);
+        [x,y, buttons] = GetMouse(w);
         if sum(buttons) > 0
             X = x; Y = y;
+            %d = sqrt((X-scr.width/2).^2+(Y-scr.height/2).^2); 
             d = sqrt((X-scr.width/2).^2+(Y-scr.height/2).^2); 
             if d > radin && d < radout
                 noresp = 0;
                 break; 
             end  
         end
+        
+        % Also check key resp
+       [keyIsDown, secs, keyCode] = KbCheck(-1);
+       if keyIsDown
+            rs_key = find(keyCode == 1);
+            % if multiple key presses, we might need only one key                
+            rs_key=rs_key(1);
+            % check keys
+            rs_keys=intersect(rs_key, KbName('escape'));
+            if ~isempty(rs_keys)
+                exitflag = 1;
+                break;
+            end    
+       end       
     end
- 
+
+    if exitflag % exit
+        sca;
+        return;        
+    end
     
-    if noresp == 1 % no response within 4 seconds
+    if noresp % no response within 4 seconds
         nTrials = nTrials + 1; % we add a trial if there is no response within 4s
-        Arc = nan;
         results.respIndArc(trial)=nan;
         results.respInd(trial) = nan; % respInd, 1~180
         results.error(trial) = nan; % error range, -90~89
@@ -239,7 +267,7 @@ while trial <= nTrials
     % debug purpose
     % fprintf('resp color is %d \n\n', results.respInd(trial));
     
-    if trial == nTrials/2
+    if rem(trial,60) == 0 % have rest every 60 trials
         Screen('FillRect',w,[255 255 255]);
         Screen('DrawTexture',w,GratingIndex,GRect,cGRect);  
         Screen('DrawText',w,'Rest, press space to continue..',scr.width/2-300,scr.height/2,0); 
@@ -258,11 +286,20 @@ end
 save(filename);
 Screen('CloseAll');
 
-%% calculate the response and save it
-histogram(results.error, 12);
-xlim([-90 90]);
-xlabel('Resp error (color deg)');
-ylabel('Number of trials');
+%% calculate some diagnostic features, and save it
+close all;
+cpsfigure(1,length(nStim));
+x = {};
+for i=1:length(nStim)
+    x = [x results.error(results.stimNum==nStim(i))];
+    ax = subplot(1,length(nStim), i);
+    histogram(x{i});
+    set(ax, 'Box', 'off');
+    xlim([-90 90]);
+    title(sprintf('Set size = %d', nStim(i)));
+    xlabel('Response error');
+    ylabel('# of Trials')
+end
 saveas(gcf, filename(1:end-4), 'png'); % save the figure
 
 %%

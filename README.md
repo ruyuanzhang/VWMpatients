@@ -6,6 +6,11 @@ This code is mainly for patient studies. In a single session, we tested many set
 
 ## History
 
+* 2020/10/21, 
+  * RZ add to 2 rest during the exp
+  * RZ add 'esc' as the key to quit
+  * RZ update data analysis script
+* 2020/10/16, RZ fixed the Mac retin
 * 2020/10/12, RZ add multiple set size levels 
 * 2019/12/05, RZ saved all non-target color in a trial  
 * 2019/10/25 RZ add 4 seconds response constraint, otherwise the trial will be added at the end.
