@@ -25,9 +25,12 @@ resolution = [2560 1600]; % pixels, be careful about the, MacOS is
 % % office desk monitor
 %scrSize = [59.5 33.5]; % [width, height] cm
 %resolution = [3840 2160]; % pixels, 
-
 nStim = [1 3 6 8]; % set size levels
-trialsPerStim = [3 3 3 3]; % How many trials for each set size.
+if mainExp
+    trialsPerStim = [50 50 30 30]; % How many trials for each set size.
+else
+    trialsPerStim = [3 3 3 3]; % How many trials for each set size.
+end
 
 viewDist = 50; %please keep the viewDist roughly 50 cm
 
@@ -63,7 +66,7 @@ colorinfo=zeros(100, 8, 3);  %
 Screen('Preference', 'SkipSyncTests', 1);
 Screens = Screen('Screens');
 PsychImaging('PrepareConfiguration');
-PsychImaging('AddTask','General','UseRetinaResolution');
+%PsychImaging('AddTask','General','UseRetinaResolution');
 ScreenNum = max(Screens); 
 %[w, wRect] = Screen('OpenWindow', ScreenNum, [255 255 255],[0 0 resolution(1) resolution(2)]); 
 [w, wRect] = PsychImaging('OpenWindow', ScreenNum);
@@ -268,41 +271,46 @@ while trial <= nTrials
     
     % debug purpose
     % fprintf('resp color is %d \n\n', results.respInd(trial));
-    
-%     if rem(trial,60) == 0 % have rest every 60 trials
-%         Screen('FillRect',w,[255 255 255]);
-%         Screen('DrawTexture',w,GratingIndex,GRect,cGRect);  
-%         Screen('DrawText',w,'Rest, press space to continue..',scr.width/2-300,scr.height/2,0); 
-%         Screen('Flip',w);  %
-%         getkeyresp('space'); % wait for space to start the experiment
-%         
-%     end
+    if mainExp
+        if rem(trial,60) == 0 % have rest every 60 trials
+            Screen('FillRect',w,[255 255 255]);
+            Screen('DrawTexture',w,GratingIndex,GRect,cGRect);
+            Screen('DrawText',w,'Rest, press space to continue..',scr.width/2-300,scr.height/2,0);
+            Screen('Flip',w);  %
+            getkeyresp('space'); % wait for space to start the experiment
+            
+        end
+    end
     
     trial = trial + 1;
 end
-% % Save the data
-% filename = strcat(subj,sprintf('_set%d_',nStim),datestr(now,'yymmddHHMM'),'.mat');
-% if exist(filename,'file')
-%     error('data file name exists')
-% end
-% save(filename);
-% Screen('CloseAll');
-% 
-% %% calculate some diagnostic features, and save it
-% close all;
-% cpsfigure(1,length(nStim));
-% x = {};
-% for i=1:length(nStim)
-%     x = [x results.error(results.stimNum==nStim(i))];
-%     ax = subplot(1,length(nStim), i);
-%     histogram(x{i});
-%     set(ax, 'Box', 'off');
-%     xlim([-90 90]);
-%     title(sprintf('Set size = %d', nStim(i)));
-%     xlabel('Response error');
-%     ylabel('# of Trials')
-% end
-% saveas(gcf, filename(1:end-4), 'png'); % save the figure
+Screen('CloseAll');
+
+if mainExp
+    % Save the data
+    filename = strcat(subj,sprintf('_set%d_',nStim),datestr(now,'yymmddHHMM'),'.mat');
+    if exist(filename,'file')
+        error('data file name exists')
+    end
+    save(filename);
+    Screen('CloseAll');
+    
+    %% calculate some diagnostic features, and save it
+    close all;
+    cpsfigure(1,length(nStim));
+    x = {};
+    for i=1:length(nStim)
+        x = [x results.error(results.stimNum==nStim(i))];
+        ax = subplot(1,length(nStim), i);
+        histogram(x{i});
+        set(ax, 'Box', 'off');
+        xlim([-90 90]);
+        title(sprintf('Set size = %d', nStim(i)));
+        xlabel('Response error');
+        ylabel('# of Trials')
+    end
+    saveas(gcf, filename(1:end-4), 'png'); % save the figure
+end
 % 
 % %%
 rmpath(genpath('./utils')); % remove the RZutil directory here
